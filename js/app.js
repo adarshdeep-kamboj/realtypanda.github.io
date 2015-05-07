@@ -221,36 +221,51 @@ Sand mail
         if (comment == "" || comment == " ") {
             $('#err-comment').show(500);
             $('#err-comment').delay(4000);
-            $('#err-comment').animate({
-                height: 'toggle'
-            }, 500, function () {
-                // Animation complete.
-            });
+            $('#err-comment').animate({height: 'toggle'}, 500, function () {});
             error = true; // change the error state to true
         }
 
         if (error == false) {
-            var dataString = $('#contact-form').serialize(); // Collect data from form
-            $.ajax({
+			var visitorName = $("#name").val();
+			var visitorEmail = $("#email").val();
+			var visitorComment = $("#comment").val();
+			
+			var request = $.ajax({
                 type: "POST",
-                url: $('#contact-form').attr('action'),
-                data: dataString,
+				url: "https://mandrillapp.com/api/1.0/messages/send.json",
+				data: {
+					'key': 'gRN7Lj8FhExbi69VzGVIgg',
+					'message': {
+						'from_email': visitorEmail,
+						'from_name': visitorName,
+						'to': [{
+								'email': 'adarshdeep.kamboj@gmail.com',
+								'name': 'Adarshdeep Singh',
+								'type': 'to'
+						}],
+						'autotext': 'true',
+						'subject': 'CONTACT :: ' + visitorName,
+						'html': visitorComment
+					}
+				},
                 timeout: 6000,
-                error: function (request, error) {
-
-                },
-                success: function (response) {
-                    response = $.parseJSON(response);
-                    if (response.success) {
-                        $('#successSend').show();
-                        $("#name").val('');
-                        $("#email").val('');
-                        $("#comment").val('');
-                    } else {
-                        $('#errorSend').show();
-                    }
-                }
+				dataType: 'json'
             });
+			
+			request.done(function() {
+				$("#name").val('');
+				$("#email").val('');
+				$("#comment").val('');
+				$('#successSend').show();
+				$('#successSend').delay(4000);
+				$('#successSend').animate({height: 'toggle'}, 100, function () {});
+			});
+			request.fail(function(){
+				$('#errorSend').show();
+				$('#errorSend').delay(4000);
+				$('#errorSend').animate({height: 'toggle'}, 100, function () {});
+			});
+			
             return false;
         }
 
